@@ -2,7 +2,7 @@
 """
 Created on Sat Nov 12 11:13:08 2016
 
-@author: jmorgan3 TEST
+@author: jmorgan3
 """
 
 import ogr, csv, os
