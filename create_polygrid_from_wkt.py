@@ -3,6 +3,7 @@
 Created on Sat Nov 12 11:13:08 2016
 
 @author: jmorgan3
+Step 2b: Create vector quadrats from raster
 """
 
 import ogr, csv, os

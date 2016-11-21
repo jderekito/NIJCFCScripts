@@ -50,5 +50,5 @@ Fiona-1.7.0-cp35-cp35m-win_amd64.whl
 *.whl
 kd_nn.py
 *.gz
-pyshp-1.2.10/.travis.yml
-pyshp-1.2.10/build/lib/shapefile.py
+pyshp-1.2.10
+pyshp-1.2.10/

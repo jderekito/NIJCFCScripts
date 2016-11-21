@@ -2,7 +2,8 @@
 """
 Created on Sat Oct 15 12:47:52 2016
 Ref: https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html
-@author: jmorgan3 test
+@author: jmorgan3 
+Step 1: Create raster based on extend of point shapefile
 """
 
 from osgeo import gdal, ogr, osr
