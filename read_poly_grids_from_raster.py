@@ -5,11 +5,11 @@ Created on Fri Nov 11 22:21:57 2016
 @author: jmorgan3
 """
 
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-=
 """
 Created on Sat Oct 15 22:24:19 2016
 https://scriptndebug.wordpress.com/2014/11/24/latitudelongitude-of-each-pixel-using-python-and-gdal/
-@author: geoderek
+nd@author: geoderek
 Step 3: Create vector quadrats from raster
 """
 

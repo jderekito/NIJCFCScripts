@@ -13,7 +13,7 @@ pixel_size = 5280
 NoData_value = -9999
 
 # Filename of input OGR file
-vector_fn = 'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/NIJ2016_SEP01_SEP30.shp'
+vector_fn = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\party_aug.shp'
 
 driver = ogr.GetDriverByName('ESRI Shapefile')
 dataset = driver.Open(vector_fn)
@@ -30,7 +30,7 @@ print(spatialRef.ExportToWkt())
 
 
 # Filename of the raster Tiff that will be created
-raster_fn = 'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/test2.tif'
+raster_fn = 'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/party_aug.tif'
 
 # Open the data source and read in the extent
 source_ds = ogr.Open(vector_fn)
