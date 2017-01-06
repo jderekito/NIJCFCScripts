@@ -20,7 +20,7 @@ for quadrat_feat in fiona.open("C:/Data/PhD/Projects/NIJCrimeForcastingChallange
             if point_within_quadrat:
                 pt_count=pt_count+1
     sum_dict[int(quadrat_feat['id'])+1] = pt_count
-#print(sum_dict)
+print(sum_dict)
 
 # Get sorted view of the keys.
 sum_dict_sorted = sorted(sum_dict.keys())
