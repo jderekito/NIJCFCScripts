@@ -51,7 +51,7 @@ with open(r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\polys_wkt.csv'
         feature = ogr.Feature(dstlayer.GetLayerDefn())
         feature.SetGeometry(poly)
         feature.SetField("ID", nb) # A field with an unique id.
-        feature.SetField("Name", "polygrid") # And a name (which is in the first field of my test file)
+        #feature.SetField("Name", "polygrid") # And a name (which is in the first field of my test file)
         dstlayer.CreateFeature(feature)
         nb=nb+1
     feature.Destroy()
