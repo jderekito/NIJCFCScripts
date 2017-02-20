@@ -17,7 +17,7 @@ References:
     https://youtu.be/PBZVTjmhl74       
 """
 from osgeo import gdal, ogr, osr
-import os, fiona, shapely.geometry
+import os, fiona, shapely.geometry, math
 from shapely.geometry import Point
 
 def shape_to_raster(vector_in, raster_out, pixel_size):
@@ -25,7 +25,6 @@ def shape_to_raster(vector_in, raster_out, pixel_size):
         os.remove(raster_out)
     except OSError:
         pass
-    pixel_size = 1320 # Define NoData value of new raster
     NoData_value = -9999
     source_ds = ogr.Open(vector_in)
     source_layer = source_ds.GetLayer()
@@ -53,7 +52,6 @@ def raster_to_grid_centroids(raster_in):
     #raster grid, but I am getting a regular spaced pattern which will work
     #http://osm.dumoulin63.net/osm2kml/
     ds = gdal.Open(raster_in)
-    pixel_size = 1320
     cols = ds.RasterXSize+1
     rows = ds.RasterYSize+1
     row_ct = 0
@@ -63,79 +61,100 @@ def raster_to_grid_centroids(raster_in):
             row_ct = row_ct+1
             for col in  range(0,cols): 
                 x,y = pixel2coord(col,row, ds)
-                print(x,y)
-                # create a geometry from coordinates
-                pt = ogr.Geometry(ogr.wkbPoint)
-                pt.SetPoint_2D(0, x, y) # X, Y; in that order!
-                buff = pt.Buffer(pixel_size/2)
-                #create polygon object:
-                (minX, maxX, minY, maxY) = buff.GetEnvelope()
-                ring = ogr.Geometry(type=ogr.wkbLinearRing)
-                ring = ogr.Geometry(ogr.wkbLinearRing)
-                ring.AddPoint_2D(minX, minY)
-                ring.AddPoint_2D(maxX, minY)
-                ring.AddPoint_2D(maxX, maxY)
-                ring.AddPoint_2D(minX, maxY)
-                ring.AddPoint_2D(minX, minY)
-                poly_envelope = ogr.Geometry(type=ogr.wkbPolygon)
-                poly_envelope.AddGeometry(ring)
-                print(poly_envelope)
-                centroid = poly_envelope.Centroid()
-                #print('"'+str(centroid.ExportToWkt()+'"'))
-                #print('"'+str(poly_envelope.ExportToWkt()+'"'))
-                point_list.append(centroid.ExportToWkt())
-#                print(centroid.ExportToWkt())
+                #print("POINT("+str(x)+" "+str(y)+")")
+                point_list.append("POINT("+str(x)+" "+str(y)+")")
         return point_list
                 
 
-def pixel2coord(x, y, ds):
-    """Returns global coordinates from pixel x, y coords"""
-    xoff, a, b, yoff, d, e = ds.GetGeoTransform()
-    xp = a * x + b * y + xoff
-    yp = d * x + e * y + yoff
+def pixel2coord(col, row, ds):
+    c, a, b, f, d, e = ds.GetGeoTransform()
+    """Returns global coordinates to pixel center using base-0 raster index"""
+    xp = a * col + b * row + a * 0.5 + b * 0.5 + c
+    yp = d * col + e * row + d * 0.5 + e * 0.5 + f
     return(xp, yp)
 
-event_pts = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\party_aug.shp'
+def create_center_points_shapefile(will_be_input):
+    try:
+        os.remove(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp')
+    except OSError:
+        pass
+    # Open the data source and read in the extent
+    source_ds = ogr.Open(event_pts)
+    source_layer = source_ds.GetLayer()
+    source_srs = source_layer.GetSpatialRef()
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    dstfile = driver.CreateDataSource(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp') # Your output file
+    dstlayer = dstfile.CreateLayer("layer", source_srs, geom_type=ogr.wkbPoint) 
+    ## Add the other attribute fields needed with the following schema :
+    fielddef = ogr.FieldDefn("ID", ogr.OFTInteger)
+    fielddef.SetWidth(10)
+    dstlayer.CreateField(fielddef)
+    # Read the feature in your csv file:
+    nb=1
+    for gcp_wkt in poly_grid_wkt_list:
+        pt = ogr.CreateGeometryFromWkt(gcp_wkt)
+        feature = ogr.Feature(dstlayer.GetLayerDefn())
+        feature.SetGeometry(pt)
+        feature.SetField("ID", nb) # A field with an unique id.
+        #feature.SetField("Name", "polygrid") # And a name (which is in the first field of my test file)
+        dstlayer.CreateFeature(feature)
+        nb=nb+1
+    feature.Destroy()
+    dstfile.Destroy()
+    
+
+    
+    
+event_pts = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\street_crime_aug.shpp'
 raster_out = 'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/quadrats.tif'
-raster_grid_size = 5280
+raster_grid_size = 330 #Specifically that the area of each cell is between 62,500 – 360,000 sq.ft.
 
 #1. create raster from event points
-shape_to_raster(event_pts, raster_out, raster_grid_size) 
+#shape_to_raster(event_pts, raster_out, raster_grid_size) 
 #2. create list of centroids of that raster
-poly_grid_wkt_list = raster_to_grid_centroids(raster_out)
+#poly_grid_wkt_list = raster_to_grid_centroids(raster_out)
 
 #3. create a point shapefile of center points
 # Please note that it will fail if a file with the same name already exists
-try:
-    os.remove(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp')
-except OSError:
-    pass
-# Open the data source and read in the extent
-source_ds = ogr.Open(event_pts)
-source_layer = source_ds.GetLayer()
-source_srs = source_layer.GetSpatialRef()
-driver = ogr.GetDriverByName("ESRI Shapefile")
-dstfile = driver.CreateDataSource(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp') # Your output file
-dstlayer = dstfile.CreateLayer("layer", source_srs, geom_type=ogr.wkbPoint) 
-## Add the other attribute fields needed with the following schema :
-fielddef = ogr.FieldDefn("ID", ogr.OFTInteger)
-fielddef.SetWidth(10)
-dstlayer.CreateField(fielddef)
-# Read the feature in your csv file:
-nb=1
-for gcp_wkt in poly_grid_wkt_list:
-    pt = ogr.CreateGeometryFromWkt(gcp_wkt)
-    feature = ogr.Feature(dstlayer.GetLayerDefn())
-    feature.SetGeometry(pt)
-    feature.SetField("ID", nb) # A field with an unique id.
-    #feature.SetField("Name", "polygrid") # And a name (which is in the first field of my test file)
-    dstlayer.CreateFeature(feature)
-    nb=nb+1
-feature.Destroy()
-dstfile.Destroy()
+#create_center_points_shapefile("test")
 
-#4. loop through grid center points and find the event points within a certain distance 
+#4 compute kde
+lhs = 3/(math.pi*math.pow(330,2))
+print('lhs={0:.10f}'.format(lhs))
 
+for center_pt_feature in fiona.open(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp'):
+    center_pt_geom = shapely.geometry.shape(center_pt_feature["geometry"])
+    buffer_result = center_pt_geom.buffer(330)
+    rhs_sum=0.0
+    lhs_x_rhs_sum=0.0
+    with fiona.open(r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\street_crime_aug.shp') as event_pts:
+        for event_pt_feature in event_pts:
+            event_geom = shapely.geometry.shape(event_pt_feature["geometry"])
+            #buffer method
+            intersects_question = event_geom.within(buffer_result)
+            #distance method is slower
+            #intersects_question = center_pt_geom.distance(event_geom)<330
+            if intersects_question:
+                #print(center_pt_feature["id"]+" is near "+event_pt_feature["id"]+" with:")
+                distance_between_pts = center_pt_geom.distance(event_geom)
+                #print("d={:f}".format((330-distance_between_pts)/330))
+                d=(330-distance_between_pts)/330
+                rhs_sum=rhs_sum+d
+                lhs_x_rhs_sum=lhs_x_rhs_sum+(lhs*d)
+        if rhs_sum>0:
+            #print("rhs_sum={:f}".format(rhs_sum))
+            print("lhs_x_rhs_sum={:f}".format(lhs_x_rhs_sum))
+                
+
+#4. loop through grid center points and find the the following:
+    # 1. the number of event points within a certain distance, weighted by distance... aka kde
+    #   2. the average distance to those points
+    # 3. the number of street lights within a certain distance 
+    #   4. the average distance to those street lights
+    # 5. the number of street lines within a certain distance 
+    #   6. the average distance to those street lines
+        
+        
 #Outer Loop through grid center points
 #for feat in fiona.open(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp'):
 #    print(feat)
@@ -154,4 +173,3 @@ dstfile.Destroy()
 #        event_pt_geom = shapely.geometry.shape(event_pt["geometry"])
 #        distance_between_pts = gcp_geom.distance(event_pt_geom)
 #        #print(distance_between_pts)
-    
