@@ -144,7 +144,8 @@ for center_pt_feature in fiona.open(r'C:/Data/PhD/Projects/NIJCrimeForcastingCha
         if rhs_sum>0:
             #print("rhs_sum={:f}".format(rhs_sum))
             print("lhs_x_rhs_sum={:f}".format(lhs_x_rhs_sum))
-                
+
+print("DONE AND DONE!!!!!")
 
 #4. loop through grid center points and find the the following:
     # 1. the number of event points within a certain distance, weighted by distance... aka kde
