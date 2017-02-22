@@ -27,21 +27,18 @@ import fiona, shapely.geometry
 import rtree, os, math
 from shapely.geometry import mapping
 
-#center_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\center_points_test.shp'
-#event_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\street_crime_test.shp'
+center_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\center_points_test.shp'
+street_lines_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\street_crime_test.shp'
 
-center_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\center_points.shp'
-event_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\street_crime_aug.shp'
+#center_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\center_points.shp'
+#event_points_file = r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data\080116_083116_Data\street_crime_aug.shp'
 
 os.chdir(r'C:\Data\PhD\Projects\NIJCrimeForcastingChallange\Data')
 
 
-lhs = 3/(math.pi*math.pow(330,2))
-print('lhs={0:.10f}'.format(lhs))
-
 events_dictionary = {}
 index = rtree.index.Index()
-with fiona.open(event_points_file, 'r') as event_points_layer:
+with fiona.open(street_lines_file, 'r') as event_points_layer:
     for event_point_feature in event_points_layer:
         event_point_geom = shapely.geometry.shape(event_point_feature['geometry'])
         event_point_geom_buffer = shapely.geometry.shape(event_point_feature['geometry']).buffer(165)

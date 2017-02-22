@@ -146,31 +146,3 @@ for center_pt_feature in fiona.open(r'C:/Data/PhD/Projects/NIJCrimeForcastingCha
             print("lhs_x_rhs_sum={:f}".format(lhs_x_rhs_sum))
 
 print("DONE AND DONE!!!!!")
-
-#4. loop through grid center points and find the the following:
-    # 1. the number of event points within a certain distance, weighted by distance... aka kde
-    #   2. the average distance to those points
-    # 3. the number of street lights within a certain distance 
-    #   4. the average distance to those street lights
-    # 5. the number of street lines within a certain distance 
-    #   6. the average distance to those street lines
-        
-        
-#Outer Loop through grid center points
-#for feat in fiona.open(r'C:/Data/PhD/Projects/NIJCrimeForcastingChallange/Data/center_points.shp'):
-#    print(feat)
-
-
-
-
-
-
-#for gcp_wkt in poly_grid_wkt_list:
-#    print(gcp_wkt)
-#    gcp_geom = ogr.CreateGeometryFromWkt(gcp_wkt)
-#    print(Point(0,0).geom_type)
-    #Inner loop through event points to see if they are within search radius of gcp
-#    for event_pt in fiona.open(event_pts):
-#        event_pt_geom = shapely.geometry.shape(event_pt["geometry"])
-#        distance_between_pts = gcp_geom.distance(event_pt_geom)
-#        #print(distance_between_pts)
